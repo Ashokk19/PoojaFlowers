@@ -1,0 +1,166 @@
+.auth-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #FBF7F4 0%, #FEF3C7 100%);
+}
+
+.auth-container {
+  max-width: 1100px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.auth-form-wrapper {
+  padding: 3rem;
+}
+
+.auth-header {
+  margin-bottom: 2rem;
+}
+
+.auth-header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #2D2D2D;
+  margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+  color: #6B7280;
+  font-size: 1.05rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #4B5563;
+}
+
+.checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.forgot-link {
+  color: #F59E0B;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.auth-btn {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #E5E5E5;
+  color: #6B7280;
+}
+
+.auth-footer a {
+  color: #F59E0B;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+.auth-side {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-side h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.auth-side p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+}
+
+.benefits-list {
+  list-style: none;
+  padding: 0;
+}
+
+.benefits-list li {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  padding-left: 0.5rem;
+  opacity: 0.95;
+}
+
+@media (max-width: 768px) {
+  .auth-container {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-side {
+    display: none;
+  }
+
+  .auth-form-wrapper {
+    padding: 2rem 1.5rem;
+  }
+
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+
+

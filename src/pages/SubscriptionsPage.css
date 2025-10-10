@@ -1,0 +1,366 @@
+.subscriptions-page {
+  width: 100%;
+}
+
+.page-hero {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.page-hero h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.page-hero p {
+  font-size: 1.2rem;
+  opacity: 0.95;
+}
+
+.plans-section {
+  padding: 4rem 2rem;
+  background: #FBF7F4;
+}
+
+.plans-grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.subscription-card {
+  background: white;
+  border: 3px solid #E5E5E5;
+  border-radius: 20px;
+  padding: 2.5rem;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.subscription-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.subscription-card.popular {
+  border-color: #F59E0B;
+  transform: scale(1.03);
+}
+
+.subscription-card.selected {
+  border-color: #10B981;
+  background: #F0FDF4;
+}
+
+.popular-tag {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.plan-header h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #2D2D2D;
+  margin-bottom: 0.5rem;
+}
+
+.plan-subtitle {
+  color: #6B7280;
+  font-size: 1.05rem;
+  margin-bottom: 1.5rem;
+}
+
+.plan-pricing {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #F3F4F6;
+}
+
+.currency {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #F59E0B;
+}
+
+.amount {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #F59E0B;
+}
+
+.period {
+  color: #6B7280;
+  font-size: 1rem;
+}
+
+.plan-details h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 1rem;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+
+.features-list li {
+  color: #4B5563;
+  padding: 0.6rem 0;
+  line-height: 1.6;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.volume-info {
+  background: #FEF3C7;
+  padding: 1rem;
+  border-radius: 10px;
+  margin: 1.5rem 0;
+  color: #92400E;
+}
+
+.plan-note {
+  font-size: 0.85rem;
+  color: #6B7280;
+  font-style: italic;
+  margin-top: 1rem;
+}
+
+.select-plan-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1.5rem;
+}
+
+.select-plan-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.select-plan-btn.selected {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+/* Order Form Section */
+.order-form-section {
+  padding: 4rem 2rem;
+  background: white;
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.order-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #FBF7F4;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.order-form-container h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.subscription-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #2D2D2D;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 0.9rem;
+  border: 2px solid #E5E5E5;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+  background: white;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #F59E0B;
+}
+
+.order-summary {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin: 1.5rem 0;
+  border: 2px solid #F59E0B;
+}
+
+.order-summary h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 1rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #F3F4F6;
+  color: #4B5563;
+}
+
+.summary-row.total {
+  border-bottom: none;
+  border-top: 2px solid #2D2D2D;
+  margin-top: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.summary-row .free {
+  color: #10B981;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 1.3rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* Why Subscribe Section */
+.why-subscribe {
+  padding: 4rem 2rem;
+  background: #FBF7F4;
+}
+
+.why-subscribe h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 3rem;
+}
+
+.benefits-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.benefit-item {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.benefit-item:hover {
+  transform: translateY(-10px);
+}
+
+.benefit-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.benefit-item h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 0.8rem;
+}
+
+.benefit-item p {
+  color: #6B7280;
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-hero h1 {
+    font-size: 2rem;
+  }
+
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .subscription-card.popular {
+    transform: scale(1);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .order-form-container {
+    padding: 2rem 1.5rem;
+  }
+}
+

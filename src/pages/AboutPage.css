@@ -1,0 +1,276 @@
+.about-page {
+  width: 100%;
+}
+
+.story-section {
+  padding: 5rem 2rem;
+  background: white;
+}
+
+.story-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.story-text h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 1.5rem;
+}
+
+.story-text p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #4B5563;
+  margin-bottom: 1.5rem;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 400px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(255, 255, 255, 0.9) 100%);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+}
+
+.mission-vision {
+  padding: 5rem 2rem;
+  background: #FBF7F4;
+}
+
+.mv-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+}
+
+.mv-card {
+  background: white;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.mv-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+}
+
+.mv-card h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 1rem;
+}
+
+.mv-card p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #6B7280;
+}
+
+.values-section {
+  padding: 5rem 2rem;
+  background: white;
+}
+
+.values-section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 3rem;
+}
+
+.values-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.value-card {
+  background: #FBF7F4;
+  padding: 2.5rem;
+  border-radius: 15px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-10px);
+}
+
+.value-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+}
+
+.value-card h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 0.8rem;
+}
+
+.value-card p {
+  color: #6B7280;
+  line-height: 1.6;
+}
+
+.team-section {
+  padding: 5rem 2rem;
+  background: #FBF7F4;
+}
+
+.team-section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 3rem;
+}
+
+.team-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.team-member {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.member-avatar {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  margin: 0 auto 1.5rem;
+}
+
+.team-member h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 0.5rem;
+}
+
+.role {
+  color: #F59E0B;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.bio {
+  color: #6B7280;
+  line-height: 1.6;
+}
+
+.locations-section {
+  padding: 5rem 2rem;
+  background: white;
+}
+
+.locations-section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 3rem;
+}
+
+.locations-grid {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.location-card {
+  background: #FBF7F4;
+  padding: 2.5rem;
+  border-radius: 15px;
+  border-left: 4px solid #F59E0B;
+}
+
+.location-card h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2D2D2D;
+  margin-bottom: 1rem;
+}
+
+.location-card p {
+  color: #6B7280;
+  line-height: 1.8;
+}
+
+.cta-section {
+  padding: 5rem 2rem;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  text-align: center;
+  color: white;
+}
+
+.cta-section h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.cta-section p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .story-content,
+  .mv-container {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+

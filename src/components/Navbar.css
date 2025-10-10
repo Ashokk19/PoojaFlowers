@@ -1,0 +1,154 @@
+.navbar {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FBF7F4 100%);
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2D2D2D;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  border-radius: 8px;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.navbar-link {
+  text-decoration: none;
+  color: #2D2D2D;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.navbar-link::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #F59E0B;
+  transition: width 0.3s ease;
+}
+
+.navbar-link:hover {
+  color: #F59E0B;
+}
+
+.navbar-link:hover::after {
+  width: 100%;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navbar-search {
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.95rem;
+  width: 250px;
+  transition: border-color 0.3s ease;
+}
+
+.navbar-search:focus {
+  border-color: #F59E0B;
+}
+
+.btn-subscribe {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  border: none;
+  padding: 0.7rem 1.8rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  font-size: 1rem;
+}
+
+.btn-subscribe:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+}
+
+.navbar-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.navbar-toggle span {
+  width: 25px;
+  height: 3px;
+  background: #2D2D2D;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+  .navbar-search {
+    width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    flex-direction: column;
+    padding: 2rem;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    display: none;
+  }
+
+  .navbar-menu.active {
+    display: flex;
+  }
+
+  .navbar-search {
+    display: none;
+  }
+
+  .navbar-toggle {
+    display: flex;
+  }
+}
+
