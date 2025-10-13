@@ -66,6 +66,9 @@ public class Subscription {
     @OneToMany(mappedBy = "subscription", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Order> orders = new HashSet<>();
     
+    // Indicates whether this subscription is the current active period at present-day time
+    private Boolean current = false;
+    
     public enum SubscriptionStatus {
         PENDING,
         ACTIVE,

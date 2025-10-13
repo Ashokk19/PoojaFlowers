@@ -26,6 +26,7 @@ public class SubscriptionResponse {
     private BigDecimal amount;
     private String deliveryAddress;
     private Boolean autoRenew;
+    private Boolean current;
     
     public static SubscriptionResponse fromSubscription(Subscription subscription) {
         // Calculate duration from start and end dates
@@ -43,6 +44,7 @@ public class SubscriptionResponse {
             .amount(subscription.getAmount())
             .deliveryAddress(subscription.getDeliveryAddress())
             .autoRenew(subscription.getAutoRenew())
+            .current(Boolean.TRUE.equals(subscription.getCurrent()))
             .build();
     }
     

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/LoginModal';
@@ -29,6 +29,15 @@ const SubscriptionsPage = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [createdSubscription, setCreatedSubscription] = useState(null);
   const [userSubscriptions, setUserSubscriptions] = useState([]);
+
+  const refreshUserSubscriptions = useCallback(async () => {
+    if (isAuthenticated() && user?.userId) {
+      try {
+        const subs = await subscriptionService.getUserSubscriptions(user.userId);
+        setUserSubscriptions(subs || []);
+      } catch (_) {}
+    }
+  }, [isAuthenticated, user]);
 
   const plans = [
     {
@@ -89,13 +98,8 @@ const SubscriptionsPage = () => {
 
   // Load user's subscriptions to drive UX rules
   useEffect(() => {
-    if (isAuthenticated() && user?.userId) {
-      subscriptionService
-        .getUserSubscriptions(user.userId)
-        .then((subs) => setUserSubscriptions(subs || []))
-        .catch(() => {});
-    }
-  }, [isAuthenticated, user]);
+    refreshUserSubscriptions();
+  }, [refreshUserSubscriptions]);
 
   // Active auto-renew subscription (if any) and helpers
   const activeAutoRenew = useMemo(
@@ -104,24 +108,18 @@ const SubscriptionsPage = () => {
   );
   const isPlanActive = (code) => userSubscriptions.some((s) => s.status === 'ACTIVE' && s.planCode === code);
 
-  // Determine if there is an ongoing membership coverage (ACTIVE or CANCELLED but not yet ended)
+  // Compute min date as the day after the CURRENT active subscription ends (if any), else today
   const todayISO = useMemo(() => new Date().toISOString().split('T')[0], []);
-  const ongoingCoverage = useMemo(() => {
-    const today = new Date();
-    const candidates = userSubscriptions.filter((s) => {
-      if (!s.endDate) return false;
-      const end = new Date(s.endDate);
-      return end >= today && (s.status === 'ACTIVE' || s.status === 'CANCELLED');
-    });
-    if (candidates.length === 0) return null;
-    // pick the one with the farthest endDate
-    return candidates.sort((a, b) => new Date(b.endDate) - new Date(a.endDate))[0];
-  }, [userSubscriptions]);
-
-  // Compute min date: after ongoing coverage end, else today
   const minStartDate = useMemo(() => {
-    if (ongoingCoverage && ongoingCoverage.endDate) {
-      const next = new Date(ongoingCoverage.endDate);
+    const today = new Date();
+    const currentActive = userSubscriptions.find((s) => {
+      if (s.status !== 'ACTIVE' || !s.startDate || !s.endDate) return false;
+      const start = new Date(s.startDate);
+      const end = new Date(s.endDate);
+      return start <= today && end >= today;
+    });
+    if (currentActive && currentActive.endDate) {
+      const next = new Date(currentActive.endDate);
       if (!isNaN(next)) {
         next.setDate(next.getDate() + 1);
         const nextISO = next.toISOString().split('T')[0];
@@ -129,7 +127,7 @@ const SubscriptionsPage = () => {
       }
     }
     return todayISO;
-  }, [ongoingCoverage, todayISO]);
+  }, [userSubscriptions, todayISO]);
 
   const handleSelectPlan = (planId) => {
     if (!isAuthenticated()) {
@@ -184,9 +182,10 @@ const SubscriptionsPage = () => {
     e.preventDefault();
     setLoading(true);
     
+    let plan;
     try {
       // Get the plan details by code
-      const plan = await subscriptionService.getPlanByCode(selectedPlan);
+      plan = await subscriptionService.getPlanByCode(selectedPlan);
       
       // Prepare subscription data
       const subscriptionData = {
@@ -205,6 +204,7 @@ const SubscriptionsPage = () => {
       // Use created subscription directly (no extra GET call required)
       setCreatedSubscription(subscription);
       setShowSuccessModal(true);
+      await refreshUserSubscriptions();
       
       // Reset form
       setSelectedPlan(null);
@@ -222,16 +222,53 @@ const SubscriptionsPage = () => {
       });
     } catch (error) {
       console.error('Error creating subscription:', error);
+      const serverMsg = error?.response?.data?.message || error?.message || '';
+      // Offer change-plan flow if upcoming subscription exists
+      if (serverMsg.includes('Upcoming subscription already exists')) {
+        const confirmChange = window.confirm(`You already have a subscription scheduled for next month. Do you want to change its plan to ${plan?.name || 'this plan'}?`);
+        if (confirmChange) {
+          try {
+            const updated = await subscriptionService.changeNextMonthPlan(user.userId, plan.id);
+            setCreatedSubscription(updated);
+            setShowSuccessModal(true);
+            await refreshUserSubscriptions();
+            // Reset form
+            setSelectedPlan(null);
+            setFormData({
+              name: user.name || '',
+              phone: user.phone || '',
+              email: user.email || '',
+              pincode: user.pincode || '',
+              address: user.address || '',
+              city: user.city || '',
+              state: user.state || '',
+              deliveryInstructions: '',
+              startDate: '',
+              autoRenew: true
+            });
+            return;
+          } catch (e2) {
+            console.error('Failed to change next month plan:', e2);
+            alert('Failed to change next month plan. Please try again.');
+            return;
+          }
+        } else {
+          return;
+        }
+      }
+
+      // Specific overlap date message from backend
       let errorMessage = 'Failed to create subscription. Please try again.';
-      
-      if (error.message && error.message.includes('Plan')) {
-        errorMessage = error.message;
-      } else if (error.response?.status === 400) {
-        errorMessage = 'Invalid subscription data. Please check your form and try again.';
+      if (serverMsg.includes('You have already subscription active in this date')) {
+        errorMessage = 'You have already subscription active in this date';
       } else if (error.response?.status === 404) {
         errorMessage = 'Selected plan not found. Please refresh the page and try again.';
+      } else if (error.response?.status === 400 && serverMsg) {
+        errorMessage = serverMsg;
+      } else if (error.message && error.message.includes('Plan')) {
+        errorMessage = error.message;
       }
-      
+
       alert(errorMessage);
     } finally {
       setLoading(false);

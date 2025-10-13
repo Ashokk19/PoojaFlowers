@@ -62,6 +62,20 @@ export const subscriptionService = {
     const response = await api.delete(`/subscriptions/${id}`);
     return response.data;
   },
+
+  // Change the next upcoming subscription's plan
+  changeNextMonthPlan: async (userId, planId) => {
+    const response = await api.put(`/subscriptions/user/${userId}/next/plan`, null, {
+      params: { planId },
+    });
+    return response.data;
+  },
+
+  // Hard delete a subscription (backend prevents deleting current active)
+  hardDeleteSubscription: async (id) => {
+    const response = await api.delete(`/subscriptions/${id}/hard`);
+    return response.data;
+  },
 };
 
 

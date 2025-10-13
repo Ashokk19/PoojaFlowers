@@ -23,20 +23,14 @@ public class SubscriptionController {
     public ResponseEntity<SubscriptionResponse> createSubscription(
             @PathVariable Long userId,
             @Valid @RequestBody SubscriptionRequest request) {
-        try {
-            System.out.println("Creating subscription for user: " + userId);
-            System.out.println("Plan ID: " + request.getPlanId());
-            System.out.println("Start Date: " + request.getStartDate());
-            System.out.println("Auto Renew: " + request.getAutoRenew());
-            
-            Subscription subscription = subscriptionService.createSubscription(userId, request);
-            System.out.println("Subscription created with ID: " + subscription.getId());
-            return ResponseEntity.ok(SubscriptionResponse.fromSubscription(subscription));
-        } catch (Exception e) {
-            System.out.println("Error creating subscription: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.badRequest().build();
-        }
+        System.out.println("Creating subscription for user: " + userId);
+        System.out.println("Plan ID: " + request.getPlanId());
+        System.out.println("Start Date: " + request.getStartDate());
+        System.out.println("Auto Renew: " + request.getAutoRenew());
+
+        Subscription subscription = subscriptionService.createSubscription(userId, request);
+        System.out.println("Subscription created with ID: " + subscription.getId());
+        return ResponseEntity.ok(SubscriptionResponse.fromSubscription(subscription));
     }
     
     @GetMapping("/user/{userId}")
@@ -70,6 +64,20 @@ public class SubscriptionController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancelSubscription(@PathVariable Long id) {
         subscriptionService.cancelSubscription(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/user/{userId}/next/plan")
+    public ResponseEntity<SubscriptionResponse> changeNextUpcomingPlan(
+            @PathVariable Long userId,
+            @RequestParam Long planId) {
+        Subscription updated = subscriptionService.changeNextUpcomingPlan(userId, planId);
+        return ResponseEntity.ok(SubscriptionResponse.fromSubscription(updated));
+    }
+
+    @DeleteMapping("/{id}/hard")
+    public ResponseEntity<Void> hardDelete(@PathVariable Long id) {
+        subscriptionService.hardDeleteSubscription(id);
         return ResponseEntity.noContent().build();
     }
 }

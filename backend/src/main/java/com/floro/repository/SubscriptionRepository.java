@@ -31,6 +31,10 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     java.time.LocalDate findLatestEndDateForUserWithStatuses(@Param("userId") Long userId,
                                                             @Param("statuses") List<Subscription.SubscriptionStatus> statuses,
                                                             @Param("today") java.time.LocalDate today);
+
+    @Query("SELECT s FROM Subscription s JOIN FETCH s.plan p JOIN FETCH s.user u ORDER BY s.createdAt DESC")
+    List<Subscription> findAllWithUserAndPlan();
+
+    // Find the earliest upcoming subscription for a user (startDate strictly after today)
+    java.util.Optional<Subscription> findFirstByUser_IdAndStartDateAfterOrderByStartDateAsc(Long userId, java.time.LocalDate today);
 }
-
-

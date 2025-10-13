@@ -44,6 +44,18 @@ const SubscriptionHistoryModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleDelete = async (id) => {
+    try {
+      if (!window.confirm('Delete this subscription? This action cannot be undone.')) return;
+      await subscriptionService.hardDeleteSubscription(id);
+      await fetchSubscriptions();
+    } catch (err) {
+      console.error('Failed to delete subscription:', err);
+      const msg = err?.response?.data?.message || 'Failed to delete. Please try again.';
+      alert(msg);
+    }
+  };
+
   const getStatusBadge = (status) => {
     const statusClass = status.toLowerCase();
     return <span className={`status-badge status-${statusClass}`}>{status}</span>;
@@ -56,6 +68,15 @@ const SubscriptionHistoryModal = ({ isOpen, onClose }) => {
       month: 'short',
       year: 'numeric'
     });
+  };
+
+  const canDelete = (sub) => {
+    if (!sub || !sub.startDate) return false;
+    const today = new Date();
+    const start = new Date(sub.startDate);
+    const startOnly = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    return startOnly < todayOnly && !sub.current;
   };
 
   if (!isOpen) return null;
@@ -149,9 +170,17 @@ const SubscriptionHistoryModal = ({ isOpen, onClose }) => {
                       <td style={{ textAlign: 'right', fontWeight: 700 }}>₹{sub.amount}</td>
                       <td style={{ textAlign: 'center' }}>{getStatusBadge(sub.status)}</td>
                       <td style={{ textAlign: 'center' }}>
-                        {sub.status === 'ACTIVE' && sub.autoRenew ? (
-                          <button className="btn-primary" onClick={() => handleCancelAutoRenew(sub.id)}>
-                            Cancel Auto‑Renew
+                        {sub.current ? (
+                          sub.autoRenew ? (
+                            <button className="btn-primary" onClick={() => handleCancelAutoRenew(sub.id)}>
+                              Cancel Auto‑Renew
+                            </button>
+                          ) : (
+                            <span style={{ opacity: 0.6 }}>—</span>
+                          )
+                        ) : canDelete(sub) ? (
+                          <button className="btn-primary" onClick={() => handleDelete(sub.id)}>
+                            Delete
                           </button>
                         ) : (
                           <span style={{ opacity: 0.6 }}>—</span>

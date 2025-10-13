@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .requestMatchers("/plans/**").permitAll()
                 .requestMatchers("/contact/**").permitAll()
                 .requestMatchers("/health/**").permitAll()
+                .requestMatchers("/admin/**").permitAll()
                 .requestMatchers("/users/**").permitAll() // TODO: Add proper JWT authentication
                 .requestMatchers("/subscriptions/**").permitAll() // TODO: Add proper JWT authentication
                 .anyRequest().authenticated()
@@ -63,5 +64,3 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 }
-
-
