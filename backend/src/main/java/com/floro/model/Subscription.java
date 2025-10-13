@@ -48,6 +48,8 @@ public class Subscription {
     
     private String deliveryInstructions;
     
+    private String deliveryTime; // Preferred delivery time slot
+    
     @Column(columnDefinition = "TEXT")
     private String pausedDates; // JSON array of dates when delivery is paused
     

@@ -140,7 +140,7 @@ const HowItWorksPage = () => {
 
       <section className="cta-section">
         <h2>Ready to Get Started?</h2>
-        <p>Join hundreds of happy customers who trust Floro for their daily puja needs</p>
+        <p>Join hundreds of happy customers who trust Floral Veda for their daily puja needs</p>
         <button className="cta-button" onClick={() => navigate('/subscriptions')}>
           Choose Your Plan
         </button>

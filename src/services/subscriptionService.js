@@ -15,8 +15,13 @@ export const subscriptionService = {
 
   // Get plan by code (value, basic, premium)
   getPlanByCode: async (code) => {
-    const response = await api.get(`/plans/code/${code}`);
-    return response.data;
+    try {
+      const response = await api.get(`/plans/code/${code}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching plan with code ${code}:`, error);
+      throw new Error(`Plan '${code}' not found. Please check if the plan exists in the database.`);
+    }
   },
 
   // Create a new subscription
@@ -39,10 +44,17 @@ export const subscriptionService = {
 
   // Update subscription status
   updateSubscriptionStatus: async (id, status) => {
-    const response = await api.put(`/subscriptions/${id}/status`, null, {
-      params: { status },
-    });
-    return response.data;
+    try {
+      console.log(`Updating subscription ${id} status to ${status}`);
+      const response = await api.put(`/subscriptions/${id}/status`, null, {
+        params: { status },
+      });
+      console.log('Status update response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating subscription ${id} status:`, error);
+      throw error;
+    }
   },
 
   // Cancel subscription

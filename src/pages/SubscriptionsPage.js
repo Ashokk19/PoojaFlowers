@@ -1,10 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import LoginModal from '../components/LoginModal';
+import { subscriptionService } from '../services/subscriptionService';
 import './SubscriptionsPage.css';
 
 const SubscriptionsPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  
+  // Form state - auto-filled from user data
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    pincode: '',
+    address: '',
+    city: '',
+    state: '',
+    deliveryInstructions: '',
+    startDate: '',
+    autoRenew: true
+  });
+  
+  const [loading, setLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdSubscription, setCreatedSubscription] = useState(null);
+  const [userSubscriptions, setUserSubscriptions] = useState([]);
 
   const plans = [
     {
@@ -63,14 +87,164 @@ const SubscriptionsPage = () => {
     }
   ];
 
+  // Load user's subscriptions to drive UX rules
+  useEffect(() => {
+    if (isAuthenticated() && user?.userId) {
+      subscriptionService
+        .getUserSubscriptions(user.userId)
+        .then((subs) => setUserSubscriptions(subs || []))
+        .catch(() => {});
+    }
+  }, [isAuthenticated, user]);
+
+  // Active auto-renew subscription (if any) and helpers
+  const activeAutoRenew = useMemo(
+    () => userSubscriptions.find((s) => s.status === 'ACTIVE' && s.autoRenew),
+    [userSubscriptions]
+  );
+  const isPlanActive = (code) => userSubscriptions.some((s) => s.status === 'ACTIVE' && s.planCode === code);
+
+  // Determine if there is an ongoing membership coverage (ACTIVE or CANCELLED but not yet ended)
+  const todayISO = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const ongoingCoverage = useMemo(() => {
+    const today = new Date();
+    const candidates = userSubscriptions.filter((s) => {
+      if (!s.endDate) return false;
+      const end = new Date(s.endDate);
+      return end >= today && (s.status === 'ACTIVE' || s.status === 'CANCELLED');
+    });
+    if (candidates.length === 0) return null;
+    // pick the one with the farthest endDate
+    return candidates.sort((a, b) => new Date(b.endDate) - new Date(a.endDate))[0];
+  }, [userSubscriptions]);
+
+  // Compute min date: after ongoing coverage end, else today
+  const minStartDate = useMemo(() => {
+    if (ongoingCoverage && ongoingCoverage.endDate) {
+      const next = new Date(ongoingCoverage.endDate);
+      if (!isNaN(next)) {
+        next.setDate(next.getDate() + 1);
+        const nextISO = next.toISOString().split('T')[0];
+        return nextISO > todayISO ? nextISO : todayISO;
+      }
+    }
+    return todayISO;
+  }, [ongoingCoverage, todayISO]);
+
   const handleSelectPlan = (planId) => {
+    if (!isAuthenticated()) {
+      setShowLoginModal(true);
+      return;
+    }
+    // Block selecting the same plan if auto-renew is ON
+    if (activeAutoRenew && planId === activeAutoRenew.planCode) {
+      alert('You already have this plan with Auto-Renew enabled. You cannot buy it again now.');
+      return;
+    }
+    
+    // Auto-fill form with user data
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        phone: user.phone || '',
+        email: user.email || '',
+        pincode: user.pincode || '',
+        address: user.address || '',
+        city: user.city || '',
+        state: user.state || '',
+        deliveryInstructions: '',
+        startDate: '',
+        autoRenew: true
+      });
+    }
+    
     setSelectedPlan(planId);
     // Scroll to order form
-    document.getElementById('order-form')?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      document.getElementById('order-form')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
+  // Ensure start date respects min when selection changes
+  useEffect(() => {
+    if (!selectedPlan) return;
+    if (!formData.startDate || formData.startDate < minStartDate) {
+      setFormData((prev) => ({ ...prev, startDate: minStartDate }));
+    }
+  }, [selectedPlan, minStartDate]);
+  
+  const handleFormChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      // Get the plan details by code
+      const plan = await subscriptionService.getPlanByCode(selectedPlan);
+      
+      // Prepare subscription data
+      const subscriptionData = {
+        planId: plan.id,
+        startDate: formData.startDate, // Backend will handle date parsing
+        deliveryAddress: `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
+        deliveryInstructions: formData.deliveryInstructions || '',
+        autoRenew: formData.autoRenew
+      };
+      
+      // Create subscription (will be created as ACTIVE automatically)
+      console.log('Creating subscription with data:', subscriptionData);
+      const subscription = await subscriptionService.createSubscription(user.userId, subscriptionData);
+      console.log('Subscription created:', subscription);
+      
+      // Use created subscription directly (no extra GET call required)
+      setCreatedSubscription(subscription);
+      setShowSuccessModal(true);
+      
+      // Reset form
+      setSelectedPlan(null);
+      setFormData({
+        name: user.name || '',
+        phone: user.phone || '',
+        email: user.email || '',
+        pincode: user.pincode || '',
+        address: user.address || '',
+        city: user.city || '',
+        state: user.state || '',
+        deliveryInstructions: '',
+        startDate: '',
+        autoRenew: true
+      });
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      let errorMessage = 'Failed to create subscription. Please try again.';
+      
+      if (error.message && error.message.includes('Plan')) {
+        errorMessage = error.message;
+      } else if (error.response?.status === 400) {
+        errorMessage = 'Invalid subscription data. Please check your form and try again.';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Selected plan not found. Please refresh the page and try again.';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="subscriptions-page">
+      <LoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)}
+      />
+      
       <section className="page-hero">
         <h1>Choose a Subscription plan</h1>
         <p>Fresh puja flowers delivered to your doorstep every morning</p>
@@ -84,6 +258,9 @@ const SubscriptionsPage = () => {
               className={`subscription-card ${plan.popular ? 'popular' : ''} ${selectedPlan === plan.id ? 'selected' : ''}`}
             >
               {plan.popular && <div className="popular-tag">POPULAR</div>}
+              {isPlanActive(plan.id) && (
+                <div className="popular-tag" style={{ background: '#16a34a' }}>ACTIVE</div>
+              )}
               
               <div className="plan-header">
                 <h2>{plan.name}</h2>
@@ -112,8 +289,13 @@ const SubscriptionsPage = () => {
               <button 
                 className={`select-plan-btn ${selectedPlan === plan.id ? 'selected' : ''}`}
                 onClick={() => handleSelectPlan(plan.id)}
+                disabled={!!(activeAutoRenew && plan.id === activeAutoRenew.planCode)}
               >
-                {selectedPlan === plan.id ? 'Selected ✓' : 'Get This Plan'}
+                {activeAutoRenew && plan.id === activeAutoRenew.planCode
+                  ? 'Active (Auto‑Renew ON)'
+                  : selectedPlan === plan.id
+                  ? 'Selected ✓'
+                  : 'Get This Plan'}
               </button>
             </div>
           ))}
@@ -124,32 +306,89 @@ const SubscriptionsPage = () => {
         <section id="order-form" className="order-form-section">
           <div className="order-form-container">
             <h2>Complete Your Subscription</h2>
-            <form className="subscription-form">
+            <p className="form-subtitle">Your details have been auto-filled from your profile</p>
+            <form className="subscription-form" onSubmit={handleSubmit}>
               <div className="form-row">
                 <div className="form-group">
                   <label>Full Name *</label>
-                  <input type="text" placeholder="Enter your name" required />
+                  <input 
+                    type="text" 
+                    name="name"
+                    value={formData.name}
+                    onChange={handleFormChange}
+                    placeholder="Enter your name" 
+                    required 
+                  />
                 </div>
                 <div className="form-group">
                   <label>Phone Number *</label>
-                  <input type="tel" placeholder="+91 XXXXX XXXXX" required />
+                  <input 
+                    type="tel" 
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleFormChange}
+                    placeholder="+91 XXXXX XXXXX" 
+                    required 
+                  />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
                   <label>Email Address *</label>
-                  <input type="email" placeholder="your.email@example.com" required />
+                  <input 
+                    type="email" 
+                    name="email"
+                    value={formData.email}
+                    onChange={handleFormChange}
+                    placeholder="your.email@example.com" 
+                    required 
+                  />
                 </div>
                 <div className="form-group">
                   <label>Pincode *</label>
-                  <input type="text" placeholder="800001" required />
+                  <input 
+                    type="text" 
+                    name="pincode"
+                    value={formData.pincode}
+                    onChange={handleFormChange}
+                    placeholder="641652" 
+                    required 
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>City *</label>
+                  <input 
+                    type="text" 
+                    name="city"
+                    value={formData.city}
+                    onChange={handleFormChange}
+                    placeholder="City" 
+                    required 
+                  />
+                </div>
+                <div className="form-group">
+                  <label>State *</label>
+                  <input 
+                    type="text" 
+                    name="state"
+                    value={formData.state}
+                    onChange={handleFormChange}
+                    placeholder="State" 
+                    required 
+                  />
                 </div>
               </div>
 
               <div className="form-group">
                 <label>Complete Address *</label>
                 <textarea 
+                  name="address"
+                  value={formData.address}
+                  onChange={handleFormChange}
                   rows="3" 
                   placeholder="House number, street, locality, landmark"
                   required
@@ -159,6 +398,9 @@ const SubscriptionsPage = () => {
               <div className="form-group">
                 <label>Delivery Instructions (Optional)</label>
                 <textarea 
+                  name="deliveryInstructions"
+                  value={formData.deliveryInstructions}
+                  onChange={handleFormChange}
                   rows="2" 
                   placeholder="Any special instructions for delivery..."
                 ></textarea>
@@ -166,7 +408,29 @@ const SubscriptionsPage = () => {
 
               <div className="form-group">
                 <label>Start Date *</label>
-                <input type="date" required />
+                <input 
+                  type="date" 
+                  name="startDate"
+                  value={formData.startDate}
+                  onChange={handleFormChange}
+                  min={minStartDate}
+                  required 
+                />
+              </div>
+
+              <div className="form-group auto-renew-group">
+                <label className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    name="autoRenew"
+                    checked={formData.autoRenew}
+                    onChange={(e) => setFormData({ ...formData, autoRenew: e.target.checked })}
+                  />
+                  <span className="checkbox-text">
+                    <strong>Enable Auto-Renewal</strong>
+                    <small>Your subscription will automatically renew every month</small>
+                  </span>
+                </label>
               </div>
 
               <div className="order-summary">
@@ -189,16 +453,65 @@ const SubscriptionsPage = () => {
                 </div>
               </div>
 
-              <button type="submit" className="submit-btn">
-                Proceed to Payment
+              <button type="submit" className="submit-btn" disabled={loading}>
+                {loading ? 'Processing...' : 'Proceed to Payment'}
               </button>
             </form>
           </div>
         </section>
       )}
 
+      {/* Success Modal */}
+      {showSuccessModal && createdSubscription && (
+        <div className="modal-overlay" onClick={() => setShowSuccessModal(false)}>
+          <div className="modal-content success-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowSuccessModal(false)}>×</button>
+            
+            <div className="success-icon">✓</div>
+            <h2>Subscription Activated!</h2>
+            <p className="success-message">Your subscription has been successfully activated</p>
+            
+            <div className="subscription-summary">
+              <div className="summary-item">
+                <span className="label">Plan:</span>
+                <span className="value">{createdSubscription.plan?.name || createdSubscription.planName}</span>
+              </div>
+              <div className="summary-item">
+                <span className="label">Start Date:</span>
+                <span className="value">{new Date(createdSubscription.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+              </div>
+              <div className="summary-item">
+                <span className="label">End Date:</span>
+                <span className="value">{new Date(createdSubscription.endDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+              </div>
+              <div className="summary-item">
+                <span className="label">Auto-Renewal:</span>
+                <span className="value">{createdSubscription.autoRenew ? 'Enabled' : 'Disabled'}</span>
+              </div>
+              <div className="summary-item">
+                <span className="label">Monthly Amount:</span>
+                <span className="value price">₹{createdSubscription.amount}</span>
+              </div>
+              <div className="summary-item">
+                <span className="label">Status:</span>
+                <span className="value status-active">{createdSubscription.status}</span>
+              </div>
+            </div>
+            
+            <div className="success-actions">
+              <button className="btn-primary" onClick={() => {
+                setShowSuccessModal(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}>
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className="why-subscribe">
-        <h2>Why Subscribe to Floro?</h2>
+        <h2>Why Subscribe to Floral Veda?</h2>
         <div className="benefits-grid">
           <div className="benefit-item">
             <div className="benefit-icon">🌸</div>

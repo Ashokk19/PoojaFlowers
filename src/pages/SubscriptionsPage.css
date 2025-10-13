@@ -2,6 +2,161 @@
   width: 100%;
 }
 
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #F3F4F6;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6B7280;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: #E5E7EB;
+  color: #2D2D2D;
+  transform: rotate(90deg);
+}
+
+/* Success Modal */
+.success-modal {
+  text-align: center;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: white;
+  margin: 0 auto 1.5rem;
+  animation: scaleIn 0.5s ease;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.success-modal h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #2D2D2D;
+  margin-bottom: 0.5rem;
+}
+
+.success-message {
+  color: #6B7280;
+  font-size: 1.05rem;
+  margin-bottom: 2rem;
+}
+
+.subscription-summary {
+  background: #F9FAFB;
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-item .label {
+  color: #6B7280;
+  font-size: 0.95rem;
+}
+
+.summary-item .value {
+  color: #2D2D2D;
+  font-weight: 600;
+}
+
+.summary-item .value.price {
+  color: #F59E0B;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.summary-item .value.status-active {
+  color: #10B981;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.success-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.success-actions .btn-primary {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.success-actions .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
 .page-hero {
   background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
   color: white;
@@ -189,6 +344,18 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
 
+.form-subtitle {
+  color: #10B981;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: 500;
+  background: #ECFDF5;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #10B981;
+}
+
 .order-form-container h2 {
   font-size: 2rem;
   font-weight: 700;
@@ -272,6 +439,47 @@
   color: #10B981;
 }
 
+/* Auto-Renewal Checkbox */
+.auto-renew-group {
+  background: #F0FDF4;
+  border: 2px solid #10B981;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  margin-top: 0.2rem;
+  accent-color: #10B981;
+}
+
+.checkbox-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checkbox-text strong {
+  color: #2D2D2D;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.checkbox-text small {
+  color: #6B7280;
+  font-size: 0.95rem;
+}
+
 .submit-btn {
   background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   color: white;
@@ -284,9 +492,14 @@
   transition: all 0.3s ease;
 }
 
-.submit-btn:hover {
+.submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Why Subscribe Section */

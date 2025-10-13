@@ -1,34 +1,75 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import './AuthPages.css';
+import api from '../services/api';
+import './EditProfileModal.css';
 
-const RegisterPage = () => {
-  const navigate = useNavigate();
-  const { register } = useAuth();
+const EditProfileModal = ({ isOpen, onClose }) => {
+  const { user, updateUser } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    password: '',
-    confirmPassword: '',
     address: '',
     pincode: '',
     city: '',
     state: ''
   });
-  const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [pincodeLoading, setPincodeLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    setError('');
-    setFieldErrors({});
+  useEffect(() => {
+    if (isOpen && user) {
+      // Load user data when modal opens
+      fetchUserData();
+    }
+  }, [isOpen, user]);
+
+  const fetchUserData = async () => {
+    try {
+      // First, try to use data from context/localStorage
+      if (user && user.phone) {
+        setFormData({
+          name: user.name || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          address: user.address || '',
+          pincode: user.pincode || '',
+          city: user.city || '',
+          state: user.state || ''
+        });
+      } else {
+        // If not available, fetch from API
+        const response = await api.get('/users/profile');
+        const userData = response.data;
+        setFormData({
+          name: userData.name || '',
+          email: userData.email || '',
+          phone: userData.phone || '',
+          address: userData.address || '',
+          pincode: userData.pincode || '',
+          city: userData.city || '',
+          state: userData.state || ''
+        });
+        // Update context with fetched data
+        updateUser(userData);
+      }
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+      // Fallback to whatever user data we have
+      if (user) {
+        setFormData({
+          name: user.name || '',
+          email: user.email || '',
+          phone: user.phone || '',
+          address: user.address || '',
+          pincode: user.pincode || '',
+          city: user.city || '',
+          state: user.state || ''
+        });
+      }
+    }
   };
 
   const fetchCityState = async (pincode) => {
@@ -36,7 +77,6 @@ const RegisterPage = () => {
 
     setPincodeLoading(true);
     try {
-      // Using India Post Pincode API
       const response = await fetch(`https://api.postalpincode.in/pincode/${pincode}`);
       const data = await response.json();
 
@@ -56,6 +96,15 @@ const RegisterPage = () => {
     } finally {
       setPincodeLoading(false);
     }
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    setError('');
+    setSuccess('');
   };
 
   const handlePincodeChange = (e) => {
@@ -78,52 +127,45 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match!');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return;
-    }
-
     setLoading(true);
+    setError('');
+    setSuccess('');
 
     try {
-      // Remove confirmPassword before sending to backend
-      const { confirmPassword, ...registrationData } = formData;
-      await register(registrationData);
-      navigate('/subscriptions');
-    } catch (err) {
-      console.error('Registration error:', err.response?.data);
+      const response = await api.put('/users/profile', formData);
       
-      // Handle validation errors
-      if (err.response?.data?.errors) {
-        setFieldErrors(err.response.data.errors);
-        const errorMessages = Object.values(err.response.data.errors).join('. ');
-        setError(errorMessages);
-      } else {
-        setError(err.response?.data?.message || 'Registration failed. Please try again.');
-      }
+      // Update user in context and localStorage
+      updateUser(response.data);
+      
+      setSuccess('Profile updated successfully!');
+      
+      // Close modal after 2 seconds
+      setTimeout(() => {
+        onClose();
+        setSuccess('');
+      }, 2000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to update profile. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <div className="auth-form-wrapper">
-          <div className="auth-header">
-            <h1>Create Account</h1>
-            <p>Sign up to start your subscription</p>
-          </div>
+  if (!isOpen) return null;
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content edit-profile-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>×</button>
+        
+        <div className="modal-header">
+          <h2>Edit Profile</h2>
+          <p>Update your personal information</p>
+        </div>
+
+        <form className="modal-form" onSubmit={handleSubmit}>
           {error && <div className="error-message">{error}</div>}
+          {success && <div className="success-message">{success}</div>}
 
           <div className="form-row">
             <div className="form-group">
@@ -134,7 +176,6 @@ const RegisterPage = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Enter your full name"
                 required
               />
             </div>
@@ -147,27 +188,26 @@ const RegisterPage = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="your.email@example.com"
                 required
+                disabled
+                title="Email cannot be changed"
               />
             </div>
           </div>
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="phone">Phone Number * (10 digits)</label>
+              <label htmlFor="phone">Phone Number *</label>
               <input
                 type="tel"
                 id="phone"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="9876543210"
+                required
                 minLength="10"
                 maxLength="15"
-                required
               />
-              {fieldErrors.phone && <span className="field-error">{fieldErrors.phone}</span>}
             </div>
 
             <div className="form-group">
@@ -180,7 +220,6 @@ const RegisterPage = () => {
                 name="pincode"
                 value={formData.pincode}
                 onChange={handlePincodeChange}
-                placeholder="Enter 6-digit pincode"
                 maxLength="6"
                 required
               />
@@ -224,73 +263,24 @@ const RegisterPage = () => {
               name="address"
               value={formData.address}
               onChange={handleChange}
-              placeholder="House number, street, locality, landmark"
               rows="3"
               required
             />
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="password">Password *</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="At least 6 characters"
-                minLength="6"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm Password *</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Re-enter password"
-                required
-              />
-            </div>
+          <div className="form-actions">
+            <button type="button" className="btn-cancel" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit" className="btn-save" disabled={loading || pincodeLoading}>
+              {loading ? 'Saving...' : 'Save Changes'}
+            </button>
           </div>
-
-          <div className="form-options">
-            <label className="checkbox-label">
-              <input type="checkbox" required />
-              <span>I agree to the Terms & Conditions</span>
-            </label>
-          </div>
-
-          <button type="submit" className="auth-btn" disabled={loading || pincodeLoading}>
-            {loading ? 'Creating Account...' : 'Create Account'}
-          </button>
         </form>
-
-          <div className="auth-footer">
-            <p>Already have an account? <Link to="/login">Login</Link></p>
-          </div>
-        </div>
-
-        <div className="auth-side">
-          <h2>Why Choose Floral Veda?</h2>
-          <p>Experience the convenience of fresh puja flowers delivered daily at your doorstep.</p>
-          <ul className="benefits-list">
-            <li>✓ Fresh flowers handpicked daily</li>
-            <li>✓ Free door basket included</li>
-            <li>✓ No disturbance delivery</li>
-            <li>✓ Cancel anytime, no penalties</li>
-          </ul>
-        </div>
       </div>
     </div>
   );
 };
 
-export default RegisterPage;
-
+export default EditProfileModal;
 

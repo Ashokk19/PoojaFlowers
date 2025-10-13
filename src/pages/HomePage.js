@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import LoginModal from '../components/LoginModal';
+import FlowerSlideshow from '../components/FlowerSlideshow';
 import './HomePage.css';
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const subscriptionPlans = [
     {
@@ -39,8 +44,20 @@ const HomePage = () => {
     }
   ];
 
+  const handleGetPlan = (planId) => {
+    if (!isAuthenticated()) {
+      setShowLoginModal(true);
+      return;
+    }
+    navigate('/subscriptions');
+  };
+
   return (
     <div className="homepage">
+      <LoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)}
+      />
       {/* Hero Section */}
       <section 
         className="hero"
@@ -100,7 +117,7 @@ const HomePage = () => {
       <section className="about-preview">
         <div className="about-content">
           <div className="about-text">
-            <h2>We are Floro</h2>
+            <h2>We are Floral Veda</h2>
             <p>
               We specialize in fresh flowers for worship rituals, delivered 
               conveniently to your doorstep every morning. Our vetted vendors 
@@ -120,12 +137,10 @@ const HomePage = () => {
             </div>
           </div>
           <div className="about-image">
-            <div className="flower-arrangement">
-              🌹🌻🌺
-              <p className="image-caption">
-                Carefully curated flowers packed before dawn for on-time delivery.
-              </p>
-            </div>
+            <FlowerSlideshow />
+            <p className="image-caption">
+              Carefully curated flowers packed before dawn for on-time delivery.
+            </p>
           </div>
         </div>
       </section>
@@ -148,7 +163,7 @@ const HomePage = () => {
               </ul>
               <button 
                 className="btn-plan" 
-                onClick={() => navigate('/subscriptions')}
+                onClick={() => handleGetPlan(plan.name)}
               >
                 Get this plan
               </button>
@@ -162,17 +177,17 @@ const HomePage = () => {
         <h2>Our Testimonials</h2>
         <div className="testimonials-container">
           <div className="testimonial-card">
-            <p>"Floro delivers fresh flowers daily, perfect for my Puja. Reliable service, high quality, and convenience make Floro a must-have!"</p>
+            <p>"Floral Veda delivers fresh flowers daily, perfect for my Puja. Reliable service, high quality, and convenience make Floral Veda  a must-have!"</p>
             <strong>Nitish Kumar</strong>
             <span>Patna</span>
           </div>
           <div className="testimonial-card">
-            <p>"Floro makes my mornings so easy with fresh flowers delivered right to my door. Great quality, super reliable—couldn't ask for more!"</p>
+            <p>"Floral Veda makes my mornings so easy with fresh flowers delivered right to my door. Great quality, super reliable—couldn't ask for more!"</p>
             <strong>Jyoti Karn</strong>
             <span>Patna</span>
           </div>
           <div className="testimonial-card">
-            <p>"Floro's daily flower delivery has been a game-changer! Always fresh, right on time, and adds a touch of peace to my day."</p>
+            <p>"Floral Veda's daily flower delivery has been a game-changer! Always fresh, right on time, and adds a touch of peace to my day."</p>
             <strong>Sachin Kumar Arya</strong>
             <span>Patna</span>
           </div>

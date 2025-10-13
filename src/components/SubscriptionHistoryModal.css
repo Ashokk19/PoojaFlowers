@@ -1,0 +1,220 @@
+.subscription-history-modal {
+  width: 90vw;
+  max-width: 1040px;
+  max-height: 90vh;
+}
+
+/* Stronger override: this modal should be much wider than the default modal */
+.modal-content.subscription-history-modal {
+  width: 98vw !important;
+  max-width: 1440px !important;
+  max-height: 96vh !important;
+  overflow: visible !important;
+  padding: 2.5rem 3rem !important;
+}
+
+.modal-body {
+  max-height: calc(90vh - 180px);
+  overflow-y: auto;
+}
+
+/* Ensure this modal avoids scroll on desktop when possible */
+.modal-content.subscription-history-modal .modal-body {
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #F3F4F6;
+  border-top: 4px solid #F59E0B;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-state p {
+  color: #DC2626;
+  margin-bottom: 1rem;
+}
+
+.retry-btn {
+  background: #F59E0B;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  padding: 4rem 2rem;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.75rem;
+  color: #2D2D2D;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: #6B7280;
+  margin-bottom: 1.5rem;
+}
+
+
+.subscription-card {
+  background: #FAFAFA;
+  border: 2px solid #E5E5E5;
+  border-radius: 12px;
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.subscription-card:hover {
+  border-color: #F59E0B;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);
+}
+
+.subscription-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.subscription-history-modal .modal-header h2 {
+  font-size: 2.5rem;
+}
+
+.subscription-history-modal .modal-header p {
+  font-size: 1.2rem;
+}
+
+.status-badge {
+  padding: 0.45rem 1rem;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-active {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.status-completed {
+  background: #DBEAFE;
+  color: #1E40AF;
+}
+
+.status-cancelled {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+.status-pending {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.subscription-details {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-row .label {
+  color: #6B7280;
+  font-size: 0.9rem;
+}
+
+.detail-row .value {
+  color: #2D2D2D;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.detail-row .price {
+  color: #F59E0B;
+  font-size: 1.1rem;
+}
+
+.value.auto-renew-enabled {
+  color: #10B981;
+  font-weight: 600;
+}
+
+.value.auto-renew-disabled {
+  color: #6B7280;
+  font-weight: 600;
+}
+
+.delivery-address {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.delivery-address .label {
+  font-size: 0.85rem;
+  color: #6B7280;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.delivery-address p {
+  color: #2D2D2D;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .subscription-history-modal {
+    width: 95vw;
+    max-width: 95vw;
+  }
+
+  .subscription-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .status-badge {
+    align-self: flex-start;
+  }
+}
+
+

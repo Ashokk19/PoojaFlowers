@@ -52,7 +52,12 @@ public class AuthService {
             savedUser.getId(),
             savedUser.getName(),
             savedUser.getEmail(),
-            savedUser.getRole().name()
+            savedUser.getRole().name(),
+            savedUser.getPhone(),
+            savedUser.getAddress(),
+            savedUser.getPincode(),
+            savedUser.getCity(),
+            savedUser.getState()
         );
     }
     
@@ -76,7 +81,12 @@ public class AuthService {
             user.getId(),
             user.getName(),
             user.getEmail(),
-            user.getRole().name()
+            user.getRole().name(),
+            user.getPhone(),
+            user.getAddress(),
+            user.getPincode(),
+            user.getCity(),
+            user.getState()
         );
     }
 }

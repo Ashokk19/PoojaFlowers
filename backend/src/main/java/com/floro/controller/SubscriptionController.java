@@ -1,6 +1,7 @@
 package com.floro.controller;
 
 import com.floro.dto.SubscriptionRequest;
+import com.floro.dto.SubscriptionResponse;
 import com.floro.model.Subscription;
 import com.floro.service.SubscriptionService;
 import jakarta.validation.Valid;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/subscriptions")
@@ -18,27 +20,51 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
     
     @PostMapping("/user/{userId}")
-    public ResponseEntity<Subscription> createSubscription(
+    public ResponseEntity<SubscriptionResponse> createSubscription(
             @PathVariable Long userId,
             @Valid @RequestBody SubscriptionRequest request) {
-        return ResponseEntity.ok(subscriptionService.createSubscription(userId, request));
+        try {
+            System.out.println("Creating subscription for user: " + userId);
+            System.out.println("Plan ID: " + request.getPlanId());
+            System.out.println("Start Date: " + request.getStartDate());
+            System.out.println("Auto Renew: " + request.getAutoRenew());
+            
+            Subscription subscription = subscriptionService.createSubscription(userId, request);
+            System.out.println("Subscription created with ID: " + subscription.getId());
+            return ResponseEntity.ok(SubscriptionResponse.fromSubscription(subscription));
+        } catch (Exception e) {
+            System.out.println("Error creating subscription: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
     }
     
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Subscription>> getUserSubscriptions(@PathVariable Long userId) {
-        return ResponseEntity.ok(subscriptionService.getUserSubscriptions(userId));
+    public ResponseEntity<List<SubscriptionResponse>> getUserSubscriptions(@PathVariable Long userId) {
+        List<Subscription> subscriptions = subscriptionService.getUserSubscriptions(userId);
+        List<SubscriptionResponse> responses = subscriptions.stream()
+            .map(SubscriptionResponse::fromSubscription)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Subscription> getSubscription(@PathVariable Long id) {
-        return ResponseEntity.ok(subscriptionService.getSubscriptionById(id));
+    public ResponseEntity<SubscriptionResponse> getSubscription(@PathVariable Long id) {
+        Subscription sub = subscriptionService.getSubscriptionById(id);
+        return ResponseEntity.ok(SubscriptionResponse.fromSubscription(sub));
     }
     
     @PutMapping("/{id}/status")
     public ResponseEntity<Subscription> updateStatus(
             @PathVariable Long id,
-            @RequestParam Subscription.SubscriptionStatus status) {
-        return ResponseEntity.ok(subscriptionService.updateSubscriptionStatus(id, status));
+            @RequestParam String status) {
+        try {
+            Subscription.SubscriptionStatus subscriptionStatus = Subscription.SubscriptionStatus.valueOf(status.toUpperCase());
+            return ResponseEntity.ok(subscriptionService.updateSubscriptionStatus(id, subscriptionStatus));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid status provided: " + status);
+            return ResponseEntity.badRequest().build();
+        }
     }
     
     @DeleteMapping("/{id}")

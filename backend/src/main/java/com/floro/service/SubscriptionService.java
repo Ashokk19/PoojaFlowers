@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -30,6 +31,17 @@ public class SubscriptionService {
         SubscriptionPlan plan = planRepository.findById(request.getPlanId())
             .orElseThrow(() -> new RuntimeException("Plan not found"));
         
+        // Validate start date: must be AFTER any ongoing coverage (ACTIVE or CANCELLED that hasn't ended yet)
+        LocalDate today = LocalDate.now();
+        LocalDate latestEnd = subscriptionRepository.findLatestEndDateForUserWithStatuses(
+            userId,
+            Arrays.asList(Subscription.SubscriptionStatus.ACTIVE, Subscription.SubscriptionStatus.CANCELLED),
+            today
+        );
+        if (latestEnd != null && !request.getStartDate().isAfter(latestEnd)) {
+            throw new RuntimeException("Start date must be after your current membership end date: " + latestEnd);
+        }
+
         Subscription subscription = new Subscription();
         subscription.setUser(user);
         subscription.setPlan(plan);
@@ -39,7 +51,7 @@ public class SubscriptionService {
         subscription.setDeliveryAddress(request.getDeliveryAddress());
         subscription.setDeliveryInstructions(request.getDeliveryInstructions());
         subscription.setAutoRenew(request.getAutoRenew());
-        subscription.setStatus(Subscription.SubscriptionStatus.PENDING);
+        subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
         
         return subscriptionRepository.save(subscription);
     }
@@ -49,15 +61,20 @@ public class SubscriptionService {
     }
     
     public Subscription getSubscriptionById(Long id) {
-        return subscriptionRepository.findById(id)
+        return subscriptionRepository.findByIdWithPlan(id)
             .orElseThrow(() -> new RuntimeException("Subscription not found"));
     }
     
     @Transactional
     public Subscription updateSubscriptionStatus(Long id, Subscription.SubscriptionStatus status) {
-        Subscription subscription = getSubscriptionById(id);
+        System.out.println("Updating subscription status - ID: " + id + ", Status: " + status);
+        Subscription subscription = subscriptionRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Subscription not found"));
+        System.out.println("Found subscription: " + subscription.getId() + ", Current status: " + subscription.getStatus());
         subscription.setStatus(status);
-        return subscriptionRepository.save(subscription);
+        Subscription updated = subscriptionRepository.save(subscription);
+        System.out.println("Updated subscription status to: " + updated.getStatus());
+        return updated;
     }
     
     @Transactional

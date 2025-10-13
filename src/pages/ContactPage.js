@@ -50,8 +50,8 @@ const ContactPage = () => {
               <div className="info-icon">📧</div>
               <div className="info-details">
                 <h3>Email</h3>
-                <p>info@floro.in</p>
-                <p>support@floro.in</p>
+                <p>info@floralveda.in</p>
+                <p>support@floralveda.in</p>
               </div>
             </div>
 
@@ -182,7 +182,7 @@ const ContactPage = () => {
           </div>
           <div className="quick-link-card">
             <h3>💼 Career</h3>
-            <p>Explore opportunities with Floro</p>
+            <p>Explore opportunities with Floral Veda</p>
           </div>
           <div className="quick-link-card">
             <h3>📱 Track Order</h3>
