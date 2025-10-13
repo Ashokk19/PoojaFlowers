@@ -8,7 +8,7 @@ const AboutPage = () => {
   return (
     <div className="about-page">
       <section className="page-hero">
-        <h1>About Floro</h1>
+        <h1>About Floral Veda</h1>
         <p>Redefining the Puja experience with fresh flowers daily</p>
       </section>
 
@@ -17,7 +17,7 @@ const AboutPage = () => {
           <div className="story-text">
             <h2>Our Story</h2>
             <p>
-              Floro was born from a simple observation: devotees across India struggle 
+              Floral Veda was born from a simple observation: devotees across India struggle 
               to find fresh, quality flowers for their daily puja rituals. Running to 
               the local flower market early morning or settling for wilted flowers 
               shouldn't be part of your spiritual journey.
@@ -116,15 +116,15 @@ const AboutPage = () => {
         <div className="locations-grid">
           <div className="location-card">
             <h3>📍 Registered Office</h3>
-            <p>Krisha Kunj, Road No-10<br/>
-               Sanjay Nagar, Patna<br/>
-               PIN-800001, Bihar</p>
+            <p>Shakti Khand, Gali No-8<br/>
+               Indirapuram, Ghaziabad<br/>
+               PIN-20100, India</p>
           </div>
           <div className="location-card">
             <h3>📍 Corporate Office</h3>
-            <p>Aravali Complex<br/>
-               Kaushambi, Delhi NCR<br/>
-               PIN-201012, India</p>
+            <p>Nyay Khand<br/>
+               Indirapuram, Delhi NCR<br/>
+               PIN-201010, India</p>
           </div>
         </div>
       </section>
