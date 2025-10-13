@@ -42,7 +42,7 @@ const SubscriptionsPage = () => {
   const plans = [
     {
       id: 'value',
-      name: 'Value',
+      name: 'Value - Daily Essentials Pack',
       price: 300,
       description: 'Affordable pack of puja flowers',
       features: [
@@ -59,7 +59,7 @@ const SubscriptionsPage = () => {
     },
     {
       id: 'basic',
-      name: 'Basic',
+      name: 'Classic - Exotic Blooms Pack',
       price: 600,
       description: 'Exotic pack of mix flowers',
       features: [
@@ -78,7 +78,7 @@ const SubscriptionsPage = () => {
     },
     {
       id: 'premium',
-      name: 'Premium',
+      name: 'Premium - Complete Puja Pack',
       price: 900,
       description: 'Pack of mix flowers with mala',
       features: [
@@ -284,7 +284,7 @@ const SubscriptionsPage = () => {
       
       <section className="page-hero">
         <h1>Choose a Subscription plan</h1>
-        <p>Fresh puja flowers delivered to your doorstep every morning</p>
+        <p>We’ve kept it simple with three thoughtfully designed subscription plans—because three is the perfect number to give you the best options without overwhelming you.</p>
       </section>
 
       <section className="plans-section">
