@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoginModal from '../components/LoginModal';
 import { subscriptionService } from '../services/subscriptionService';
+import api from '../services/api';
 import './SubscriptionsPage.css';
 
 const SubscriptionsPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, updateUser } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   
@@ -38,6 +39,15 @@ const SubscriptionsPage = () => {
       } catch (_) {}
     }
   }, [isAuthenticated, user]);
+
+  const refreshUserProfile = useCallback(async () => {
+    try {
+      const resp = await api.get('/users/profile');
+      if (resp?.data) {
+        updateUser(resp.data);
+      }
+    } catch (_) {}
+  }, [updateUser]);
 
   const plans = [
     {
@@ -187,13 +197,21 @@ const SubscriptionsPage = () => {
       // Get the plan details by code
       plan = await subscriptionService.getPlanByCode(selectedPlan);
       
+      // Determine if user wants to use a referral bonus (10% discount)
+      let useReferralBonus = false;
+      const bonusAvailable = (user?.referralBonusAvailable || 0) > 0;
+      if (bonusAvailable) {
+        useReferralBonus = window.confirm('You have a referral bonus available. Use it now for a 10% discount on this subscription?');
+      }
+
       // Prepare subscription data
       const subscriptionData = {
         planId: plan.id,
         startDate: formData.startDate, // Backend will handle date parsing
         deliveryAddress: `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
         deliveryInstructions: formData.deliveryInstructions || '',
-        autoRenew: formData.autoRenew
+        autoRenew: formData.autoRenew,
+        useReferralBonus
       };
       
       // Create subscription (will be created as ACTIVE automatically)
@@ -204,6 +222,8 @@ const SubscriptionsPage = () => {
       // Use created subscription directly (no extra GET call required)
       setCreatedSubscription(subscription);
       setShowSuccessModal(true);
+      await refreshUserSubscriptions();
+      await refreshUserProfile();
       await refreshUserSubscriptions();
       
       // Reset form
@@ -232,6 +252,7 @@ const SubscriptionsPage = () => {
             setCreatedSubscription(updated);
             setShowSuccessModal(true);
             await refreshUserSubscriptions();
+            await refreshUserProfile();
             // Reset form
             setSelectedPlan(null);
             setFormData({
@@ -533,6 +554,12 @@ const SubscriptionsPage = () => {
                 <span className="label">Status:</span>
                 <span className="value status-active">{createdSubscription.status}</span>
               </div>
+              {createdSubscription.referralCode && (
+                <div className="summary-item">
+                  <span className="label">Your Referral Code:</span>
+                  <span className="value">{createdSubscription.referralCode}</span>
+                </div>
+              )}
             </div>
             
             <div className="success-actions">

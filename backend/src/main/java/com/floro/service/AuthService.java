@@ -42,23 +42,36 @@ public class AuthService {
         user.setRole(User.UserRole.CUSTOMER);
         user.setActive(true);
         
+        // If a referral code was provided, just record which code was used.
+        // Bonus will be credited to referrer only after this new user makes their first purchase.
+        String providedCode = request.getReferralCode();
+        if (providedCode != null && !providedCode.trim().isEmpty()) {
+            userRepository.findByReferralCode(providedCode.trim().toUpperCase())
+                .ifPresent(referrer -> user.setReferrerCodeUsed(referrer.getReferralCode()));
+        }
+        
         User savedUser = userRepository.save(user);
         
         // Generate JWT token (simplified for now)
         String token = "jwt-token-" + savedUser.getId(); // TODO: Implement proper JWT
         
-        return new AuthResponse(
-            token,
-            savedUser.getId(),
-            savedUser.getName(),
-            savedUser.getEmail(),
-            savedUser.getRole().name(),
-            savedUser.getPhone(),
-            savedUser.getAddress(),
-            savedUser.getPincode(),
-            savedUser.getCity(),
-            savedUser.getState()
-        );
+        com.floro.dto.AuthResponse resp = new com.floro.dto.AuthResponse();
+        resp.setToken(token);
+        resp.setUserId(savedUser.getId());
+        resp.setName(savedUser.getName());
+        resp.setEmail(savedUser.getEmail());
+        resp.setRole(savedUser.getRole().name());
+        resp.setPhone(savedUser.getPhone());
+        resp.setAddress(savedUser.getAddress());
+        resp.setPincode(savedUser.getPincode());
+        resp.setCity(savedUser.getCity());
+        resp.setState(savedUser.getState());
+        resp.setReferralCode(savedUser.getReferralCode());
+        resp.setReferralBonusAvailable(savedUser.getReferralBonusAvailable());
+        resp.setReferralBonusUsed(savedUser.getReferralBonusUsed());
+        resp.setReferralBonusMax(savedUser.getReferralBonusMax());
+        resp.setReferrerCodeUsed(savedUser.getReferrerCodeUsed());
+        return resp;
     }
     
     public AuthResponse login(AuthRequest request) {
@@ -76,18 +89,23 @@ public class AuthService {
         // Generate JWT token (simplified for now)
         String token = "jwt-token-" + user.getId(); // TODO: Implement proper JWT
         
-        return new AuthResponse(
-            token,
-            user.getId(),
-            user.getName(),
-            user.getEmail(),
-            user.getRole().name(),
-            user.getPhone(),
-            user.getAddress(),
-            user.getPincode(),
-            user.getCity(),
-            user.getState()
-        );
+        com.floro.dto.AuthResponse resp = new com.floro.dto.AuthResponse();
+        resp.setToken(token);
+        resp.setUserId(user.getId());
+        resp.setName(user.getName());
+        resp.setEmail(user.getEmail());
+        resp.setRole(user.getRole().name());
+        resp.setPhone(user.getPhone());
+        resp.setAddress(user.getAddress());
+        resp.setPincode(user.getPincode());
+        resp.setCity(user.getCity());
+        resp.setState(user.getState());
+        resp.setReferralCode(user.getReferralCode());
+        resp.setReferralBonusAvailable(user.getReferralBonusAvailable());
+        resp.setReferralBonusUsed(user.getReferralBonusUsed());
+        resp.setReferralBonusMax(user.getReferralBonusMax());
+        resp.setReferrerCodeUsed(user.getReferrerCodeUsed());
+        return resp;
     }
 }
 

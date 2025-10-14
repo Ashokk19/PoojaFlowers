@@ -20,6 +20,13 @@ public class AuthResponse {
     private String city;
     private String state;
     
+    // Referral fields
+    private String referralCode;
+    private Integer referralBonusAvailable;
+    private Integer referralBonusUsed;
+    private Integer referralBonusMax;
+    private String referrerCodeUsed;
+    
     public AuthResponse(String token, Long userId, String name, String email, String role) {
         this.token = token;
         this.userId = userId;

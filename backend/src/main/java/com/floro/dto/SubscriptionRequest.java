@@ -21,6 +21,9 @@ public class SubscriptionRequest {
     private String deliveryInstructions;
     
     private Boolean autoRenew = true;
+    
+    // Optional: use one referral bonus for 10% discount on this subscription
+    private Boolean useReferralBonus = false;
 }
 
 

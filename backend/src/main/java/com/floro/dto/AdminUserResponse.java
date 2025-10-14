@@ -24,4 +24,9 @@ public class AdminUserResponse {
     private String city;
     private String state;
     private LocalDateTime createdAt;
+    private String referralCode;
+    private Integer referralBonusAvailable;
+    private Integer referralBonusUsed;
+    private Integer referralBonusMax;
+    private String referrerCodeUsed;
 }

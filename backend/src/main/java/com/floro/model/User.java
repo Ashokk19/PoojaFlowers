@@ -67,6 +67,22 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Order> orders = new HashSet<>();
     
+    // Referral program fields
+    @Column(unique = true)
+    private String referralCode; // Generated when the user subscribes for the first time
+    
+    @Column
+    private Integer referralBonusAvailable = 0;
+    
+    @Column
+    private Integer referralBonusUsed = 0;
+    
+    @Column
+    private Integer referralBonusMax = 3; // Maximum bonuses a user can hold
+    
+    // Stores which referrer code this user used during sign-up (if any)
+    private String referrerCodeUsed;
+    
     public enum UserRole {
         CUSTOMER,
         VENDOR,

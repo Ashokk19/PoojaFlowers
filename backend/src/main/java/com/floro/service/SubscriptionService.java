@@ -70,12 +70,42 @@ public class SubscriptionService {
         subscription.setPlan(plan);
         subscription.setStartDate(request.getStartDate());
         subscription.setEndDate(request.getStartDate().plusMonths(1));
-        subscription.setAmount(plan.getMonthlyPrice());
+        java.math.BigDecimal price = plan.getMonthlyPrice();
+        boolean useBonus = Boolean.TRUE.equals(request.getUseReferralBonus());
+        if (useBonus && user.getReferralBonusAvailable() != null && user.getReferralBonusAvailable() > 0) {
+            java.math.BigDecimal discount = price.multiply(new java.math.BigDecimal("0.10"));
+            price = price.subtract(discount).setScale(2, java.math.RoundingMode.HALF_UP);
+            // consume one bonus
+            user.setReferralBonusAvailable(user.getReferralBonusAvailable() - 1);
+            user.setReferralBonusUsed((user.getReferralBonusUsed() == null ? 0 : user.getReferralBonusUsed()) + 1);
+            userRepository.save(user);
+        }
+        subscription.setAmount(price);
         subscription.setDeliveryAddress(request.getDeliveryAddress());
         subscription.setDeliveryInstructions(request.getDeliveryInstructions());
         subscription.setAutoRenew(request.getAutoRenew());
         subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
         
+        // First-time purchase: if this user signed up with a referrer code, credit referrer's available bonus (up to max)
+        long existingCount = subscriptionRepository.countByUser_Id(userId);
+        if (existingCount == 0 && user.getReferrerCodeUsed() != null && !user.getReferrerCodeUsed().isBlank()) {
+            userRepository.findByReferralCode(user.getReferrerCodeUsed()).ifPresent(referrer -> {
+                Integer max = referrer.getReferralBonusMax() != null ? referrer.getReferralBonusMax() : 3;
+                Integer available = referrer.getReferralBonusAvailable() != null ? referrer.getReferralBonusAvailable() : 0;
+                if (available < max) {
+                    referrer.setReferralBonusAvailable(available + 1);
+                    userRepository.save(referrer);
+                }
+            });
+        }
+
+        // Generate referral code on first-ever subscription for this user
+        if (user.getReferralCode() == null || user.getReferralCode().isBlank()) {
+            String code = generateUniqueReferralCode();
+            user.setReferralCode(code);
+            userRepository.save(user);
+        }
+
         Subscription saved = subscriptionRepository.save(subscription);
         refreshCurrentFlags(userId);
         return saved;
@@ -159,6 +189,14 @@ public class SubscriptionService {
                 subscriptionRepository.save(s);
             }
         }
+    }
+
+    private String generateUniqueReferralCode() {
+        String code;
+        do {
+            code = java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
+        } while (userRepository.findByReferralCode(code).isPresent());
+        return code;
     }
 }
 

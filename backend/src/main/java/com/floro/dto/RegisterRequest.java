@@ -26,6 +26,9 @@ public class RegisterRequest {
     private String pincode;
     private String city;
     private String state;
+    
+    // Optional referral code used during signup
+    private String referralCode;
 }
 
 

@@ -15,7 +15,8 @@ const RegisterPage = () => {
     address: '',
     pincode: '',
     city: '',
-    state: ''
+    state: '',
+    referralCode: ''
   });
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
@@ -213,6 +214,20 @@ const RegisterPage = () => {
                 placeholder={pincodeLoading ? "Auto-filling..." : "State"}
                 required
                 readOnly={pincodeLoading}
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="referralCode">Referral Code (Optional)</label>
+              <input
+                type="text"
+                id="referralCode"
+                name="referralCode"
+                value={formData.referralCode}
+                onChange={handleChange}
+                placeholder="Enter referral code if you have one"
               />
             </div>
           </div>

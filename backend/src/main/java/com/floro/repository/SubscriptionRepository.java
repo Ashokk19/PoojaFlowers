@@ -37,4 +37,6 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     // Find the earliest upcoming subscription for a user (startDate strictly after today)
     java.util.Optional<Subscription> findFirstByUser_IdAndStartDateAfterOrderByStartDateAsc(Long userId, java.time.LocalDate today);
+    
+    long countByUser_Id(Long userId);
 }

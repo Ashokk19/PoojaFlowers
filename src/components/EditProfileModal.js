@@ -20,11 +20,40 @@ const EditProfileModal = ({ isOpen, onClose }) => {
   const [pincodeLoading, setPincodeLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen && user) {
+    if (isOpen) {
       // Load user data when modal opens
-      fetchUserData();
+      (async () => {
+        try {
+          const response = await api.get('/users/profile');
+          const userData = response.data;
+          setFormData({
+            name: userData.name || '',
+            email: userData.email || '',
+            phone: userData.phone || '',
+            address: userData.address || '',
+            pincode: userData.pincode || '',
+            city: userData.city || '',
+            state: userData.state || ''
+          });
+          updateUser(userData);
+        } catch (err) {
+          console.error('Error fetching user data:', err);
+          // Fallback to whatever user data we have
+          if (user) {
+            setFormData({
+              name: user.name || '',
+              email: user.email || '',
+              phone: user.phone || '',
+              address: user.address || '',
+              pincode: user.pincode || '',
+              city: user.city || '',
+              state: user.state || ''
+            });
+          }
+        }
+      })();
     }
-  }, [isOpen, user]);
+  }, [isOpen]);
 
   const fetchUserData = async () => {
     try {
@@ -162,6 +191,35 @@ const EditProfileModal = ({ isOpen, onClose }) => {
           <h2>Edit Profile</h2>
           <p>Update your personal information</p>
         </div>
+
+        {user && (
+          <div style={{
+            margin: '12px 0 20px',
+            padding: '12px 16px',
+            border: '1px solid #e5e7eb',
+            borderRadius: 8,
+            background: '#f9fafb'
+          }}>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <div>
+                <strong>Referral Code:</strong>{' '}
+                <span>{user.referralCode || '— (generated on first subscription)'}</span>
+              </div>
+              <div>
+                <strong>Bonuses:</strong>{' '}
+                <span>
+                  {Number(user.referralBonusAvailable || 0)} available · {Number(user.referralBonusUsed || 0)} used · max {Number(user.referralBonusMax || 3)}
+                </span>
+              </div>
+              {user.referrerCodeUsed && (
+                <div>
+                  <strong>Referred By:</strong>{' '}
+                  <span>{user.referrerCodeUsed}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <form className="modal-form" onSubmit={handleSubmit}>
           {error && <div className="error-message">{error}</div>}

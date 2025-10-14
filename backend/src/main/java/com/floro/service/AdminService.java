@@ -34,6 +34,11 @@ public class AdminService {
                         .city(u.getCity())
                         .state(u.getState())
                         .createdAt(u.getCreatedAt())
+                        .referralCode(u.getReferralCode())
+                        .referralBonusAvailable(u.getReferralBonusAvailable())
+                        .referralBonusUsed(u.getReferralBonusUsed())
+                        .referralBonusMax(u.getReferralBonusMax())
+                        .referrerCodeUsed(u.getReferrerCodeUsed())
                         .build())
                 .collect(Collectors.toList());
     }
