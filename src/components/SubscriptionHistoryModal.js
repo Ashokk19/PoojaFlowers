@@ -61,6 +61,17 @@ const SubscriptionHistoryModal = ({ isOpen, onClose }) => {
     return <span className={`status-badge status-${statusClass}`}>{status}</span>;
   };
 
+  const computeDisplayStatus = (sub) => {
+    if (!sub) return '-';
+    if (sub.status === 'CANCELLED' || sub.status === 'PAUSED') return sub.status;
+    const todayISO = new Date().toISOString().split('T')[0];
+    const startISO = sub.startDate ? String(sub.startDate).slice(0, 10) : null;
+    const endISO = sub.endDate ? String(sub.endDate).slice(0, 10) : null;
+    if (startISO && startISO > todayISO) return 'PENDING';
+    if (endISO && endISO < todayISO) return 'EXPIRED';
+    return 'ACTIVE';
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('en-IN', {
@@ -71,12 +82,11 @@ const SubscriptionHistoryModal = ({ isOpen, onClose }) => {
   };
 
   const canDelete = (sub) => {
-    if (!sub || !sub.startDate) return false;
-    const today = new Date();
-    const start = new Date(sub.startDate);
-    const startOnly = new Date(start.getFullYear(), start.getMonth(), start.getDate());
-    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    return startOnly < todayOnly && !sub.current;
+    if (!sub || !sub.startDate) return { allowed: false, reason: 'Missing start date' };
+    const todayISO = new Date().toISOString().split('T')[0];
+    const startISO = String(sub.startDate).slice(0, 10);
+    if (startISO > todayISO) return { allowed: true };
+    return { allowed: false, reason: 'Only upcoming (not yet started) subscriptions can be deleted' };
   };
 
   if (!isOpen) return null;
@@ -168,9 +178,9 @@ const SubscriptionHistoryModal = ({ isOpen, onClose }) => {
                       </td>
                       <td style={{ textAlign: 'center' }}>{sub.deliveryTime || '6:00 AM - 7:00 AM'}</td>
                       <td style={{ textAlign: 'right', fontWeight: 700 }}>₹{sub.amount}</td>
-                      <td style={{ textAlign: 'center' }}>{getStatusBadge(sub.status)}</td>
+                      <td style={{ textAlign: 'center' }}>{getStatusBadge(computeDisplayStatus(sub))}</td>
                       <td style={{ textAlign: 'center' }}>
-                        {sub.current ? (
+                        {computeDisplayStatus(sub) === 'ACTIVE' ? (
                           sub.autoRenew ? (
                             <button className="btn-primary" onClick={() => handleCancelAutoRenew(sub.id)}>
                               Cancel Auto‑Renew
@@ -178,13 +188,21 @@ const SubscriptionHistoryModal = ({ isOpen, onClose }) => {
                           ) : (
                             <span style={{ opacity: 0.6 }}>—</span>
                           )
-                        ) : canDelete(sub) ? (
-                          <button className="btn-primary" onClick={() => handleDelete(sub.id)}>
-                            Delete
-                          </button>
-                        ) : (
-                          <span style={{ opacity: 0.6 }}>—</span>
-                        )}
+                        ) : (() => {
+                          const deletion = canDelete(sub);
+                          if (!deletion.allowed) {
+                            return (
+                              <button className="btn-secondary" disabled title={deletion.reason}>
+                                Delete
+                              </button>
+                            );
+                          }
+                          return (
+                            <button className="btn-primary" onClick={() => handleDelete(sub.id)}>
+                              Delete
+                            </button>
+                          );
+                        })()}
                       </td>
                     </tr>
                   ))}

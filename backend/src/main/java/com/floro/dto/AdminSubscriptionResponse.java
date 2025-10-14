@@ -22,6 +22,7 @@ public class AdminSubscriptionResponse {
     private String planCode;
     private String planName;
     private String status;
+    private String paymentStatus;
     private LocalDate startDate;
     private LocalDate endDate;
     private BigDecimal amount;

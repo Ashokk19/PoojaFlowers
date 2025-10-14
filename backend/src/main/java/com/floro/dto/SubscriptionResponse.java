@@ -32,12 +32,27 @@ public class SubscriptionResponse {
     public static SubscriptionResponse fromSubscription(Subscription subscription) {
         // Calculate duration from start and end dates
         String duration = calculateDuration(subscription.getStartDate(), subscription.getEndDate());
-        
+
+        // Derive a display status from dates to avoid stale status issues
+        java.time.LocalDate today = java.time.LocalDate.now();
+        String displayStatus;
+        if (subscription.getStatus() == Subscription.SubscriptionStatus.CANCELLED) {
+            displayStatus = "CANCELLED";
+        } else if (subscription.getStatus() == Subscription.SubscriptionStatus.PAUSED) {
+            displayStatus = "PAUSED";
+        } else if (subscription.getStartDate() != null && subscription.getStartDate().isAfter(today)) {
+            displayStatus = "PENDING"; // upcoming
+        } else if (subscription.getEndDate() != null && today.isAfter(subscription.getEndDate())) {
+            displayStatus = "EXPIRED";
+        } else {
+            displayStatus = "ACTIVE";
+        }
+
         return SubscriptionResponse.builder()
             .id(subscription.getId())
             .planCode(subscription.getPlan().getPlanCode())
             .planName(subscription.getPlan().getName())
-            .status(subscription.getStatus().toString())
+            .status(displayStatus)
             .duration(duration)
             .startDate(subscription.getStartDate())
             .endDate(subscription.getEndDate())

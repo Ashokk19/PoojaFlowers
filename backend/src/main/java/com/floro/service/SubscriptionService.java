@@ -30,6 +30,8 @@ public class SubscriptionService {
         
         SubscriptionPlan plan = planRepository.findById(request.getPlanId())
             .orElseThrow(() -> new RuntimeException("Plan not found"));
+
+        List<Subscription> existingSubscriptions = subscriptionRepository.findByUserId(userId);
         
         // Handle upcoming subscription logic relative to the requested start date
         LocalDate today = LocalDate.now();
@@ -45,8 +47,7 @@ public class SubscriptionService {
             // If requested date is after the upcoming end date, create a new subscription
             // and disable auto-renew on older ones (subscriptions starting before the new one)
             if (request.getStartDate().isAfter(nextUpcoming.getEndDate())) {
-                List<Subscription> existing = subscriptionRepository.findByUserId(userId);
-                for (Subscription s : existing) {
+                for (Subscription s : existingSubscriptions) {
                     if (Boolean.TRUE.equals(s.getAutoRenew()) && s.getStartDate() != null && s.getStartDate().isBefore(request.getStartDate())) {
                         s.setAutoRenew(false);
                         subscriptionRepository.save(s);
@@ -83,8 +84,12 @@ public class SubscriptionService {
         subscription.setAmount(price);
         subscription.setDeliveryAddress(request.getDeliveryAddress());
         subscription.setDeliveryInstructions(request.getDeliveryInstructions());
-        subscription.setAutoRenew(request.getAutoRenew());
-        subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
+        subscription.setAutoRenew(true);
+        boolean startsInFuture = subscription.getStartDate() != null && subscription.getStartDate().isAfter(today);
+        Subscription.SubscriptionStatus initialStatus = startsInFuture
+            ? Subscription.SubscriptionStatus.PENDING
+            : Subscription.SubscriptionStatus.ACTIVE;
+        subscription.setStatus(initialStatus);
         
         // First-time purchase: if this user signed up with a referrer code, credit referrer's available bonus (up to max)
         long existingCount = subscriptionRepository.countByUser_Id(userId);
@@ -107,11 +112,19 @@ public class SubscriptionService {
         }
 
         Subscription saved = subscriptionRepository.save(subscription);
+
+        for (Subscription prior : existingSubscriptions) {
+            if (Boolean.TRUE.equals(prior.getAutoRenew())) {
+                prior.setAutoRenew(false);
+                subscriptionRepository.save(prior);
+            }
+        }
         refreshCurrentFlags(userId);
         return saved;
     }
     
     public List<Subscription> getUserSubscriptions(Long userId) {
+        refreshCurrentFlags(userId);
         return subscriptionRepository.findByUserId(userId);
     }
     
@@ -170,8 +183,40 @@ public class SubscriptionService {
         if (isCurrentActive) {
             throw new RuntimeException("Cannot delete current active subscription");
         }
-        if (s.getStartDate() != null && !s.getStartDate().isBefore(today)) {
-            throw new RuntimeException("Cannot delete a subscription that starts today or in the future");
+        List<Subscription> list = subscriptionRepository.findByUserId(s.getUser().getId());
+        for (Subscription sub : list) {
+            boolean hasStarted = sub.getStartDate() != null && !today.isBefore(sub.getStartDate());
+            boolean hasEnded = sub.getEndDate() != null && today.isAfter(sub.getEndDate());
+
+            Subscription.SubscriptionStatus desiredStatus = sub.getStatus();
+            if (sub.getStatus() != Subscription.SubscriptionStatus.CANCELLED
+                && sub.getStatus() != Subscription.SubscriptionStatus.PAUSED) {
+                if (!hasStarted) {
+                    desiredStatus = Subscription.SubscriptionStatus.PENDING;
+                } else if (!hasEnded) {
+                    desiredStatus = Subscription.SubscriptionStatus.ACTIVE;
+                } else {
+                    desiredStatus = Subscription.SubscriptionStatus.EXPIRED;
+                }
+            }
+
+            boolean isCurrent = desiredStatus == Subscription.SubscriptionStatus.ACTIVE;
+            boolean statusChanged = desiredStatus != sub.getStatus();
+            boolean currentChanged = !Boolean.valueOf(isCurrent).equals(sub.getCurrent());
+
+            if (statusChanged) {
+                sub.setStatus(desiredStatus);
+            }
+            if (currentChanged) {
+                sub.setCurrent(isCurrent);
+            }
+            if (statusChanged || currentChanged) {
+                subscriptionRepository.save(sub);
+            }
+        }
+        // Only allow deletion for upcoming subscriptions that have not started yet
+        if (s.getStartDate() == null || !s.getStartDate().isAfter(today)) {
+            throw new RuntimeException("Only upcoming (not yet started) subscriptions can be deleted");
         }
         subscriptionRepository.delete(s);
         refreshCurrentFlags(s.getUser().getId());
@@ -181,11 +226,32 @@ public class SubscriptionService {
         LocalDate today = LocalDate.now();
         List<Subscription> list = subscriptionRepository.findByUserId(userId);
         for (Subscription s : list) {
-            boolean isCurrent = s.getStatus() == Subscription.SubscriptionStatus.ACTIVE
-                && (s.getStartDate() == null || !today.isBefore(s.getStartDate()))
-                && (s.getEndDate() == null || !today.isAfter(s.getEndDate()));
-            if (!Boolean.valueOf(isCurrent).equals(s.getCurrent())) {
+            boolean hasStarted = s.getStartDate() != null && !today.isBefore(s.getStartDate());
+            boolean hasEnded = s.getEndDate() != null && today.isAfter(s.getEndDate());
+
+            Subscription.SubscriptionStatus desiredStatus = s.getStatus();
+            if (s.getStatus() != Subscription.SubscriptionStatus.CANCELLED
+                && s.getStatus() != Subscription.SubscriptionStatus.PAUSED) {
+                if (!hasStarted) {
+                    desiredStatus = Subscription.SubscriptionStatus.PENDING;
+                } else if (!hasEnded) {
+                    desiredStatus = Subscription.SubscriptionStatus.ACTIVE;
+                } else {
+                    desiredStatus = Subscription.SubscriptionStatus.EXPIRED;
+                }
+            }
+
+            boolean isCurrent = desiredStatus == Subscription.SubscriptionStatus.ACTIVE;
+            boolean statusChanged = desiredStatus != s.getStatus();
+            boolean currentChanged = !Boolean.valueOf(isCurrent).equals(s.getCurrent());
+
+            if (statusChanged) {
+                s.setStatus(desiredStatus);
+            }
+            if (currentChanged) {
                 s.setCurrent(isCurrent);
+            }
+            if (statusChanged || currentChanged) {
                 subscriptionRepository.save(s);
             }
         }

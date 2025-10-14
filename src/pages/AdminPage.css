@@ -1,0 +1,32 @@
+.admin-layout{display:flex;min-height:calc(100vh - 100px);gap:0}
+.admin-sidebar{width:220px;background:#0f172a;color:#fff;padding:24px 16px;display:flex;flex-direction:column;gap:8px}
+.sidebar-item{padding:10px 12px;border-radius:8px;cursor:pointer;color:#e2e8f0;font-weight:600}
+.sidebar-item:hover{background:#1e293b}
+.sidebar-item.active{background:#334155;color:#fff}
+.admin-main{flex:1;padding:24px 28px;background:#f8fafc}
+.admin-section{display:flex;flex-direction:column;gap:16px}
+.admin-header{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.input{padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;min-width:260px}
+.select{padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;background:#fff}
+.select.small{padding:6px 10px}
+.radio-group{display:flex;gap:12px;align-items:center}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 4px 12px rgba(2,6,23,0.05);overflow:hidden}
+.table{width:100%;border-collapse:separate;border-spacing:0}
+.table thead th{background:#f1f5f9;color:#0f172a;text-align:left;padding:14px 16px;border-bottom:1px solid #e5e7eb;font-weight:700}
+.table tbody td{padding:14px 16px;border-bottom:1px solid #f1f5f9}
+.row-actions{display:flex;gap:8px}
+.btn{background:#0ea5e9;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer}
+.btn:hover{background:#0284c7}
+.btn.danger{background:#ef4444}
+.btn.danger:hover{background:#dc2626}
+.badge{padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.badge.success{background:#dcfce7;color:#166534}
+.badge.neutral{background:#e5e7eb;color:#374151}
+.badge.active{background:#dbeafe;color:#1e40af}
+.badge.pending{background:#fef3c7;color:#92400e}
+.badge.cancelled{background:#fee2e2;color:#991b1b}
+.badge.paused{background:#ede9fe;color:#5b21b6}
+.badge.expired{background:#f3f4f6;color:#4b5563}
+.sub-muted{font-size:12px;color:#64748b}
+@media (max-width: 900px){.admin-sidebar{display:none}.admin-main{padding:16px}}

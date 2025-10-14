@@ -33,6 +33,38 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllSubscriptions());
     }
 
+    @PutMapping("/users/{userId}/active")
+    public ResponseEntity<AdminUserResponse> setUserActive(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long userId,
+            @RequestParam boolean active) {
+        assertAdmin(token);
+        return ResponseEntity.ok(adminService.updateUserActiveStatus(userId, active));
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<Void> deleteUser(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long userId) {
+        assertAdmin(token);
+        adminService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/subscriptions/{subId}/payment-status")
+    public ResponseEntity<AdminSubscriptionResponse> setPaymentStatus(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long subId,
+            @RequestParam String status) {
+        assertAdmin(token);
+        try {
+            com.floro.model.Subscription.PaymentStatus ps = com.floro.model.Subscription.PaymentStatus.valueOf(status.toUpperCase());
+            return ResponseEntity.ok(adminService.updatePaymentStatus(subId, ps));
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payment status");
+        }
+    }
+
     private void assertAdmin(String token) {
         Long userId = extractUserIdFromToken(token);
         User user = userService.getUserById(userId);

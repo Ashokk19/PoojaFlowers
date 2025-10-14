@@ -39,4 +39,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     java.util.Optional<Subscription> findFirstByUser_IdAndStartDateAfterOrderByStartDateAsc(Long userId, java.time.LocalDate today);
     
     long countByUser_Id(Long userId);
+
+    @Query("SELECT COUNT(s) FROM Subscription s WHERE s.user.id = :userId AND s.endDate > :today")
+    long countByUserWithEndDateAfter(@Param("userId") Long userId, @Param("today") java.time.LocalDate today);
 }

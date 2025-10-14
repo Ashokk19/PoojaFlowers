@@ -69,12 +69,21 @@ public class Subscription {
     // Indicates whether this subscription is the current active period at present-day time
     private Boolean current = false;
     
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+    
     public enum SubscriptionStatus {
         PENDING,
         ACTIVE,
         PAUSED,
         CANCELLED,
         EXPIRED
+    }
+
+    public enum PaymentStatus {
+        PENDING,
+        PAID,
+        FAILED
     }
 }
 
