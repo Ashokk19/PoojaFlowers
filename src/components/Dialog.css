@@ -1,0 +1,138 @@
+/* Global dialog styles leveraging existing modal classes */
+
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.global-dialog {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 480px;
+  width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.22s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dialog specific */
+.global-dialog {
+  padding: 1.75rem 2rem;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.dialog-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.dialog-icon.info { background: #DBEAFE; color: #1E40AF; }
+.dialog-icon.success { background: #D1FAE5; color: #065F46; }
+.dialog-icon.warning { background: #FEF3C7; color: #92400E; }
+.dialog-icon.error { background: #FEE2E2; color: #991B1B; }
+
+.dialog-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2D2D2D;
+}
+
+.dialog-body p {
+  margin: 0.5rem 0 0;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.dialog-btn {
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.dialog-btn:focus {
+  outline: 2px solid #F59E0B;
+  outline-offset: 2px;
+}
+
+.dialog-btn:hover { transform: translateY(-1px); }
+
+.dialog-btn-secondary {
+  background: #F3F4F6;
+  color: #374151;
+}
+
+.dialog-btn-primary {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+}
+
+.dialog-btn-primary.success { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 8px 20px rgba(16,185,129,0.35); }
+.dialog-btn-primary.warning { background: linear-gradient(135deg, #F59E0B, #D97706); box-shadow: 0 8px 20px rgba(245,158,11,0.35); }
+.dialog-btn-primary.error { background: linear-gradient(135deg, #EF4444, #DC2626); box-shadow: 0 8px 20px rgba(239,68,68,0.35); }
+.dialog-btn-primary.info { background: linear-gradient(135deg, #3B82F6, #2563EB); box-shadow: 0 8px 20px rgba(59,130,246,0.35); }
+
+.global-dialog .modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: #F3F4F6;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B7280;
+}
+
+.global-dialog .modal-close:hover { background: #F59E0B; color: #fff; }

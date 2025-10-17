@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { adminService } from '../services/adminService';
 import './AdminPage.css';
+import { useDialog } from '../components/DialogProvider';
 
 const AdminPage = () => {
   const { user, loading } = useAuth();
@@ -11,6 +12,7 @@ const AdminPage = () => {
   const [subs, setSubs] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState('');
+  const { alert: dialogAlert, confirm: dialogConfirm } = useDialog();
 
   // UI state
   const [activeTab, setActiveTab] = useState('users');
@@ -87,30 +89,71 @@ const AdminPage = () => {
       const updated = await adminService.setUserActive(u.id, !u.active);
       setUsers(prev => prev.map(x => x.id === updated.id ? updated : x));
     } catch (e) {
-      alert(e?.response?.data?.message || 'Failed to update user status');
+      await dialogAlert({
+        title: 'Update Failed',
+        message: e?.response?.data?.message || 'Failed to update user status',
+        variant: 'error',
+      });
     }
   };
 
   const deleteUser = async (u) => {
     try {
       if (u.active) {
-        alert('User is active. Deactivate before deleting.');
+        await dialogAlert({
+          title: 'Cannot Delete',
+          message: 'User is active. Deactivate before deleting.',
+          variant: 'warning',
+        });
         return;
       }
-      if (!window.confirm(`Delete user ${u.name}? This action cannot be undone.`)) return;
+      const confirmed = await dialogConfirm({
+        title: 'Delete User',
+        message: `Delete user ${u.name}? This action cannot be undone.`,
+        variant: 'error',
+        okText: 'Delete',
+        cancelText: 'Cancel',
+      });
+      if (!confirmed) return;
       await adminService.deleteUser(u.id);
       setUsers(prev => prev.filter(x => x.id !== u.id));
     } catch (e) {
-      alert(e?.response?.data?.message || 'Failed to delete user');
+      await dialogAlert({
+        title: 'Delete Failed',
+        message: e?.response?.data?.message || 'Failed to delete user',
+        variant: 'error',
+      });
     }
   };
 
   const updatePaymentStatus = async (subId, status) => {
+    const currentSub = subs.find(s => s.id === subId);
+    const oldStatus = String(currentSub?.paymentStatus || 'PENDING').toUpperCase();
+    const newStatus = String(status).toUpperCase();
+
+    if (oldStatus === newStatus) return;
+
+    const confirmed = await dialogConfirm({
+      title: 'Change Payment Status',
+      message: `Are you sure you want to change payment status from ${oldStatus} to ${newStatus} for Subscription #${subId}?`,
+      variant: 'warning',
+      okText: 'Change',
+      cancelText: 'Cancel',
+    });
+    if (!confirmed) {
+      setSubs((prev) => [...prev]);
+      return;
+    }
+
     try {
-      const updated = await adminService.setPaymentStatus(subId, status);
+      const updated = await adminService.setPaymentStatus(subId, newStatus);
       setSubs(prev => prev.map(s => s.id === updated.id ? { ...s, paymentStatus: updated.paymentStatus } : s));
     } catch (e) {
-      alert(e?.response?.data?.message || 'Failed to update payment status');
+      await dialogAlert({
+        title: 'Update Failed',
+        message: e?.response?.data?.message || 'Failed to update payment status',
+        variant: 'error',
+      });
     }
   };
 

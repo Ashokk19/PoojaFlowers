@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { subscriptionService } from '../services/subscriptionService';
 import './SubscriptionHistoryModal.css';
+import { useDialog } from './DialogProvider';
 
 const SubscriptionHistoryModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { alert: dialogAlert, confirm: dialogConfirm } = useDialog();
 
   useEffect(() => {
     if (isOpen) {
@@ -35,24 +37,46 @@ const SubscriptionHistoryModal = ({ isOpen, onClose }) => {
 
   const handleCancelAutoRenew = async (id) => {
     try {
-      if (!window.confirm('Cancel auto-renewal for this subscription? It will not renew next month.')) return;
+      const ok = await dialogConfirm({
+        title: 'Cancel Auto‑Renew?',
+        message: 'Cancel auto‑renewal for this subscription? It will not renew next month.',
+        okText: 'Cancel Auto‑Renew',
+        cancelText: 'Keep Enabled',
+        variant: 'warning',
+      });
+      if (!ok) return;
       await subscriptionService.cancelSubscription(id);
       await fetchSubscriptions();
     } catch (err) {
       console.error('Failed to cancel auto-renew:', err);
-      alert('Failed to cancel auto-renew. Please try again.');
+      await dialogAlert({
+        title: 'Action Failed',
+        message: 'Failed to cancel auto‑renew. Please try again.',
+        variant: 'error',
+      });
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      if (!window.confirm('Delete this subscription? This action cannot be undone.')) return;
+      const ok = await dialogConfirm({
+        title: 'Delete Subscription?',
+        message: 'Delete this subscription? This action cannot be undone.',
+        okText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'error',
+      });
+      if (!ok) return;
       await subscriptionService.hardDeleteSubscription(id);
       await fetchSubscriptions();
     } catch (err) {
       console.error('Failed to delete subscription:', err);
       const msg = err?.response?.data?.message || 'Failed to delete. Please try again.';
-      alert(msg);
+      await dialogAlert({
+        title: 'Delete Failed',
+        message: msg,
+        variant: 'error',
+      });
     }
   };
 

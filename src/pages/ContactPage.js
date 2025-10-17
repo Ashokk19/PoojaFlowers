@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import './ContactPage.css';
+import { useDialog } from '../components/DialogProvider';
 
 const ContactPage = () => {
+  const { alert: dialogAlert } = useDialog();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,10 +19,14 @@ const ContactPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // TODO: Implement API call
-    alert('Thank you for contacting us! We will get back to you soon.');
+    await dialogAlert({
+      title: 'Message Sent',
+      message: 'Thank you for contacting us! We will get back to you soon.',
+      variant: 'success',
+    });
     setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
   };
 

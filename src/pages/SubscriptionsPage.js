@@ -5,10 +5,12 @@ import LoginModal from '../components/LoginModal';
 import { subscriptionService } from '../services/subscriptionService';
 import api from '../services/api';
 import './SubscriptionsPage.css';
+import { useDialog } from '../components/DialogProvider';
 
 const SubscriptionsPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, updateUser } = useAuth();
+  const { alert: dialogAlert, confirm: dialogConfirm } = useDialog();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   
@@ -146,7 +148,11 @@ const SubscriptionsPage = () => {
     }
     // Block selecting the same plan if auto-renew is ON
     if (activeAutoRenew && planId === activeAutoRenew.planCode) {
-      alert('You already have this plan with Auto-Renew enabled. You cannot buy it again now.');
+      dialogAlert({
+        title: 'Already Active',
+        message: 'You already have this plan with Auto‑Renew enabled. You cannot buy it again now.',
+        variant: 'warning',
+      });
       return;
     }
     
@@ -201,7 +207,13 @@ const SubscriptionsPage = () => {
       let useReferralBonus = false;
       const bonusAvailable = (user?.referralBonusAvailable || 0) > 0;
       if (bonusAvailable) {
-        useReferralBonus = window.confirm('You have a referral bonus available. Use it now for a 10% discount on this subscription?');
+        useReferralBonus = await dialogConfirm({
+          title: 'Apply Referral Bonus?',
+          message: 'You have a referral bonus available. Use it now for a 10% discount on this subscription?',
+          okText: 'Apply Discount',
+          cancelText: 'No Thanks',
+          variant: 'success',
+        });
       }
 
       // Prepare subscription data
@@ -245,7 +257,13 @@ const SubscriptionsPage = () => {
       const serverMsg = error?.response?.data?.message || error?.message || '';
       // Offer change-plan flow if upcoming subscription exists
       if (serverMsg.includes('Upcoming subscription already exists')) {
-        const confirmChange = window.confirm(`You already have a subscription scheduled for next month. Do you want to change its plan to ${plan?.name || 'this plan'}?`);
+        const confirmChange = await dialogConfirm({
+          title: 'Change Upcoming Plan?',
+          message: `You already have a subscription scheduled for next month. Do you want to change its plan to ${plan?.name || 'this plan'}?`,
+          okText: 'Change Plan',
+          cancelText: 'Keep Current',
+          variant: 'warning',
+        });
         if (confirmChange) {
           try {
             const updated = await subscriptionService.changeNextMonthPlan(user.userId, plan.id);
@@ -270,7 +288,11 @@ const SubscriptionsPage = () => {
             return;
           } catch (e2) {
             console.error('Failed to change next month plan:', e2);
-            alert('Failed to change next month plan. Please try again.');
+            await dialogAlert({
+              title: 'Change Failed',
+              message: 'Failed to change next month plan. Please try again.',
+              variant: 'error',
+            });
             return;
           }
         } else {
@@ -290,7 +312,11 @@ const SubscriptionsPage = () => {
         errorMessage = error.message;
       }
 
-      alert(errorMessage);
+      await dialogAlert({
+        title: 'Subscription Failed',
+        message: errorMessage,
+        variant: 'error',
+      });
     } finally {
       setLoading(false);
     }
